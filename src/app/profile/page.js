@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { getProfile, updateProfile } from '@/services/profileService';
+import { ApiError } from '@/lib/api';
 
 export default function ProfilePage() {
-    const router = useRouter();
     const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [saveStatus, setSaveStatus] = useState(null); // 'success' | 'error' | null
 
     const [formData, setFormData] = useState({
         name: '',
@@ -17,9 +19,9 @@ export default function ProfilePage() {
         resumeLink: '',
         socials: { github: '', linkedin: '', website: '' },
         skills: '',
-        interests: '', // Comma separated for simplicity in UI, converted to array on submit
-        experience: [], // Array of objects
-        education: [], // Array of objects
+        interests: '',
+        experience: [],
+        education: [],
     });
 
     useEffect(() => {
@@ -28,9 +30,7 @@ export default function ProfilePage() {
 
     const fetchProfile = async () => {
         try {
-            const res = await fetch('http://localhost:5000/api/profile');
-            const data = await res.json();
-
+            const data = await getProfile();
             setFormData({
                 ...data,
                 socials: data.socials || { github: '', linkedin: '', website: '' },
@@ -39,16 +39,15 @@ export default function ProfilePage() {
                 experience: data.experience || [],
                 education: data.education || [],
             });
-            setLoading(false);
-        } catch (error) {
-            console.error(error);
+        } catch (err) {
+            console.error('Failed to load profile:', err instanceof ApiError ? err.message : err);
+        } finally {
             setLoading(false);
         }
     };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-
         if (name.startsWith('socials.')) {
             const socialField = name.split('.')[1];
             setFormData(prev => ({
@@ -60,7 +59,6 @@ export default function ProfilePage() {
         }
     };
 
-    // Helper to handle changes in array lists (Experience/Education)
     const handleListChange = (index, listName, field, value) => {
         setFormData(prev => {
             const newList = [...prev[listName]];
@@ -86,29 +84,24 @@ export default function ProfilePage() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setSaving(true);
+        setSaveStatus(null);
         try {
             const submissionData = {
                 ...formData,
                 skills: formData.skills.split(',').map(s => s.trim()).filter(s => s),
                 interests: formData.interests.split(',').map(s => s.trim()).filter(s => s),
             };
-
-            const res = await fetch('http://localhost:5000/api/profile', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(submissionData),
-            });
-
-            if (res.ok) {
-                alert('Profile updated successfully!');
-                fetchProfile();
-            } else {
-                alert('Failed to update profile');
-            }
-        } catch (error) {
-            console.error(error);
+            await updateProfile(submissionData);
+            setSaveStatus('success');
+            fetchProfile();
+        } catch (err) {
+            setSaveStatus('error');
+            console.error('Failed to update profile:', err instanceof ApiError ? err.message : err);
+        } finally {
+            setSaving(false);
+            // Auto-clear success/error message after 3 seconds
+            setTimeout(() => setSaveStatus(null), 3000);
         }
     };
 
@@ -117,8 +110,18 @@ export default function ProfilePage() {
     return (
         <div style={{ maxWidth: '900px', margin: '0 auto', paddingBottom: '4rem' }}>
             <header className="flex-between" style={{ marginBottom: '2rem' }}>
-                <h2 style={{ fontSize: '1.875rem', fontWeight: 700 }}>Edit Profile & Resume</h2>
-                <button className="btn" onClick={handleSubmit}>Save Changes</button>
+                <h2 style={{ fontSize: '1.875rem', fontWeight: 700 }}>Edit Profile &amp; Resume</h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    {saveStatus === 'success' && (
+                        <span style={{ color: 'var(--success)', fontSize: '0.9rem' }}>✓ Saved successfully!</span>
+                    )}
+                    {saveStatus === 'error' && (
+                        <span style={{ color: 'var(--danger)', fontSize: '0.9rem' }}>✗ Save failed. Try again.</span>
+                    )}
+                    <button className="btn" onClick={handleSubmit} disabled={saving}>
+                        {saving ? 'Saving...' : 'Save Changes'}
+                    </button>
+                </div>
             </header>
 
             <form onSubmit={handleSubmit}>
@@ -159,7 +162,6 @@ export default function ProfilePage() {
                             + Add Education
                         </button>
                     </div>
-
                     {formData.education.map((edu, index) => (
                         <div key={index} style={{ backgroundColor: 'var(--bg-tertiary)', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>
                             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -192,7 +194,6 @@ export default function ProfilePage() {
                             + Add Experience
                         </button>
                     </div>
-
                     {formData.experience.map((exp, index) => (
                         <div key={index} style={{ backgroundColor: 'var(--bg-tertiary)', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>
                             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -224,12 +225,10 @@ export default function ProfilePage() {
                 {/* Other Details */}
                 <div className="card" style={{ marginBottom: '2rem' }}>
                     <h3 style={{ marginBottom: '1.5rem', color: 'var(--accent)', fontSize: '1.25rem' }}>Additional Info</h3>
-
                     <div style={{ marginBottom: '1rem' }}>
                         <label>Resume PDF Link</label>
                         <input type="url" name="resumeLink" value={formData.resumeLink} onChange={handleChange} />
                     </div>
-
                     <div style={{ marginBottom: '1rem' }}>
                         <label>Professional Summary (Bio)</label>
                         <textarea
@@ -240,12 +239,10 @@ export default function ProfilePage() {
                             style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                         />
                     </div>
-
                     <div style={{ marginBottom: '1rem' }}>
                         <label>Skills (Comma separated)</label>
                         <input type="text" name="skills" value={formData.skills} onChange={handleChange} />
                     </div>
-
                     <div>
                         <label>Interests (Comma separated)</label>
                         <input type="text" name="interests" value={formData.interests} onChange={handleChange} placeholder="Reading, Hiking, Coding..." />

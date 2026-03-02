@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import { getAllUsers } from '@/services/userService';
+import { ApiError } from '@/lib/api';
 
 export default function UsersPage() {
     const [users, setUsers] = useState([]);
@@ -13,17 +15,10 @@ export default function UsersPage() {
 
     const fetchUsers = async () => {
         try {
-            // Ensure backend session is included if you want protected data
-            const res = await fetch('http://localhost:5000/api/users', {
-                credentials: 'include'
-            });
-            if (!res.ok) {
-                throw new Error('Failed to fetch users');
-            }
-            const data = await res.json();
+            const data = await getAllUsers();
             setUsers(data);
         } catch (err) {
-            setError(err.message);
+            setError(err instanceof ApiError ? err.message : 'Failed to fetch users');
         } finally {
             setLoading(false);
         }

@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Editor from '@/components/Editor';
+import { createBlog } from '@/services/blogService';
+import { ApiError } from '@/lib/api';
 
 export default function AddBlogPage() {
     const router = useRouter();
+    const [submitting, setSubmitting] = useState(false);
     const [formData, setFormData] = useState({
         title: '',
         slug: '',
@@ -36,27 +39,17 @@ export default function AddBlogPage() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setSubmitting(true);
         try {
-            const res = await fetch('http://localhost:5000/api/blogs', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    ...formData,
-                    tags: formData.tags.split(',').map(tag => tag.trim())
-                }),
+            await createBlog({
+                ...formData,
+                tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean),
             });
-
-            if (res.ok) {
-                router.push('/blogs');
-            } else {
-                const err = await res.json();
-                alert('Error: ' + err.message);
-            }
-        } catch (error) {
-            console.error(error);
-            alert('Something went wrong');
+            router.push('/blogs');
+        } catch (err) {
+            alert('Error: ' + (err instanceof ApiError ? err.message : err.message));
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -173,8 +166,8 @@ export default function AddBlogPage() {
                         >
                             Cancel
                         </button>
-                        <button type="submit" className="btn">
-                            Publish Post
+                        <button type="submit" className="btn" disabled={submitting}>
+                            {submitting ? 'Publishing...' : 'Publish Post'}
                         </button>
                     </div>
                 </form>

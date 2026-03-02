@@ -2,37 +2,38 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { getAllProjects, deleteProject } from '@/services/projectService';
+import { ApiError } from '@/lib/api';
 
 export default function ProjectsPage() {
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         fetchProjects();
     }, []);
 
     const fetchProjects = async () => {
+        setLoading(true);
+        setError(null);
         try {
-            const res = await fetch('http://localhost:5000/api/projects');
-            const data = await res.json();
+            const data = await getAllProjects();
             setProjects(data);
-            setLoading(false);
-        } catch (error) {
-            console.error(error);
+        } catch (err) {
+            setError(err instanceof ApiError ? err.message : 'Failed to load projects');
+        } finally {
             setLoading(false);
         }
     };
 
-    const deleteProject = async (id) => {
-        if (confirm('Are you sure you want to delete this project?')) {
-            try {
-                await fetch(`http://localhost:5000/api/projects/${id}`, {
-                    method: 'DELETE',
-                });
-                fetchProjects();
-            } catch (error) {
-                console.error(error);
-            }
+    const handleDelete = async (id) => {
+        if (!confirm('Are you sure you want to delete this project?')) return;
+        try {
+            await deleteProject(id);
+            fetchProjects();
+        } catch (err) {
+            alert('Delete failed: ' + (err instanceof ApiError ? err.message : err.message));
         }
     };
 
@@ -47,6 +48,12 @@ export default function ProjectsPage() {
                     Add New Project
                 </Link>
             </header>
+
+            {error && (
+                <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>
+                    {error}
+                </div>
+            )}
 
             {loading ? (
                 <p>Loading...</p>
@@ -87,12 +94,11 @@ export default function ProjectsPage() {
                                     </td>
                                     <td>
                                         <button
-                                            onClick={() => deleteProject(project._id)}
+                                            onClick={() => handleDelete(project._id)}
                                             style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger)' }}
                                         >
                                             Delete
                                         </button>
-                                        {/* Placeholder for Edit button logic */}
                                     </td>
                                 </tr>
                             ))}

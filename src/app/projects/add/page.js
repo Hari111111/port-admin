@@ -2,14 +2,17 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { createProject } from '@/services/projectService';
+import { ApiError } from '@/lib/api';
 
 export default function AddProjectPage() {
     const router = useRouter();
+    const [submitting, setSubmitting] = useState(false);
     const [formData, setFormData] = useState({
         title: '',
         image: '',
         description: '',
-        technologies: '', // Comma separated string
+        technologies: '',
         liveUrl: '',
         githubUrl: '',
         featured: false,
@@ -25,27 +28,17 @@ export default function AddProjectPage() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setSubmitting(true);
         try {
-            const res = await fetch('http://localhost:5000/api/projects', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    ...formData,
-                    technologies: formData.technologies.split(',').map(t => t.trim()).filter(t => t)
-                }),
+            await createProject({
+                ...formData,
+                technologies: formData.technologies.split(',').map(t => t.trim()).filter(t => t)
             });
-
-            if (res.ok) {
-                router.push('/projects');
-            } else {
-                const err = await res.json();
-                alert('Error: ' + err.message);
-            }
-        } catch (error) {
-            console.error(error);
-            alert('Something went wrong');
+            router.push('/projects');
+        } catch (err) {
+            alert('Error: ' + (err instanceof ApiError ? err.message : err.message));
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -162,8 +155,8 @@ export default function AddProjectPage() {
                         >
                             Cancel
                         </button>
-                        <button type="submit" className="btn">
-                            Create Project
+                        <button type="submit" className="btn" disabled={submitting}>
+                            {submitting ? 'Creating...' : 'Create Project'}
                         </button>
                     </div>
                 </form>

@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
+import { getBlogById } from '@/services/blogService';
+import { ApiError } from '@/lib/api';
 
 export default function ViewBlogPage() {
     const params = useParams();
@@ -21,14 +23,10 @@ export default function ViewBlogPage() {
 
     const fetchBlogDetails = async () => {
         try {
-            const res = await fetch(`http://localhost:5000/api/blogs/${id}`);
-            if (!res.ok) {
-                throw new Error('Blog not found');
-            }
-            const data = await res.json();
+            const data = await getBlogById(id);
             setBlog(data);
         } catch (err) {
-            setError(err.message);
+            setError(err instanceof ApiError ? err.message : 'Blog not found');
         } finally {
             setLoading(false);
         }
@@ -58,7 +56,6 @@ export default function ViewBlogPage() {
                 </button>
 
                 <div style={{ display: 'flex', gap: '1rem' }}>
-                    {/* Placeholder for Edit button if needed later */}
                     <span className="status active" style={{ backgroundColor: 'rgba(99, 102, 241, 0.1)', color: 'var(--accent)' }}>
                         {blog.category}
                     </span>

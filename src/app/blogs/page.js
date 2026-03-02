@@ -2,37 +2,38 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { getAllBlogs, deleteBlog } from '@/services/blogService';
+import { ApiError } from '@/lib/api';
 
 export default function BlogsPage() {
     const [blogs, setBlogs] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         fetchBlogs();
     }, []);
 
     const fetchBlogs = async () => {
+        setLoading(true);
+        setError(null);
         try {
-            const res = await fetch('http://localhost:5000/api/blogs');
-            const data = await res.json();
+            const data = await getAllBlogs();
             setBlogs(data);
-            setLoading(false);
-        } catch (error) {
-            console.error(error);
+        } catch (err) {
+            setError(err instanceof ApiError ? err.message : 'Failed to load blogs');
+        } finally {
             setLoading(false);
         }
     };
 
-    const deleteBlog = async (id) => {
-        if (confirm('Are you sure you want to delete this blog?')) {
-            try {
-                await fetch(`http://localhost:5000/api/blogs/${id}`, {
-                    method: 'DELETE',
-                });
-                fetchBlogs();
-            } catch (error) {
-                console.error(error);
-            }
+    const handleDelete = async (id) => {
+        if (!confirm('Are you sure you want to delete this blog?')) return;
+        try {
+            await deleteBlog(id);
+            fetchBlogs();
+        } catch (err) {
+            alert('Delete failed: ' + (err instanceof ApiError ? err.message : err.message));
         }
     };
 
@@ -47,6 +48,12 @@ export default function BlogsPage() {
                     Add New Blog
                 </Link>
             </header>
+
+            {error && (
+                <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>
+                    {error}
+                </div>
+            )}
 
             {loading ? (
                 <p>Loading...</p>
@@ -66,7 +73,7 @@ export default function BlogsPage() {
                             {blogs.map((blog) => (
                                 <tr key={blog._id}>
                                     <td>
-                                        <Link href={`/blogs/${blog._id}`} style={{ fontWeight: 500, color: 'var(--text-primary)', textDecoration: 'none' }} className="hover:text-indigo-400">
+                                        <Link href={`/blogs/${blog._id}`} style={{ fontWeight: 500, color: 'var(--text-primary)', textDecoration: 'none' }}>
                                             {blog.title}
                                         </Link>
                                     </td>
@@ -87,7 +94,7 @@ export default function BlogsPage() {
                                                 <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)' }}>View</button>
                                             </Link>
                                             <button
-                                                onClick={() => deleteBlog(blog._id)}
+                                                onClick={() => handleDelete(blog._id)}
                                                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger)' }}
                                             >
                                                 Delete

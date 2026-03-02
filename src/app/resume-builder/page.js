@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect } from 'react';
 import { useReactToPrint } from 'react-to-print';
+import { getProfile } from '@/services/profileService';
 
 // --- TEMPLATES ---
 
@@ -268,11 +269,9 @@ export default function ResumeBuilder() {
     });
 
     useEffect(() => {
-        // Fetch profile data similarly to before...
         const fetchProfile = async () => {
             try {
-                const res = await fetch('http://localhost:5000/api/profile');
-                const data = await res.json();
+                const data = await getProfile();
                 if (data && data.name) {
                     setResumeData(prev => ({
                         ...prev,
