@@ -1,34 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ─── Aurora Emerald Theme ────────────────────────────────────────────────────
+   Deep obsidian backgrounds with vivid teal-emerald accent.
+   Completely different from every other admin panel.
+───────────────────────────────────────────────────────────────────────────── */
+
 :root {
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --bg-tertiary: #334155;
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --accent: #6366f1;
-  --accent-hover: #4f46e5;
-  --border: #334155;
-  --success: #10b981;
-  --warning: #f59e0b;
-  --danger: #ef4444;
+  /* Backgrounds — near-black with a subtle teal/green undertone */
+  --bg-primary:    #030d0e;
+  --bg-secondary:  #071619;
+  --bg-tertiary:   #0d2326;
+  --bg-card:       #091e22;
+
+  /* Text */
+  --text-primary:   #e8faf8;
+  --text-secondary: #7fb8b4;
+  --text-muted:     #3e7a76;
+
+  /* Aurora Teal-Emerald Accent */
+  --accent:         #0fd4b8;
+  --accent-hover:   #0bb89f;
+  --accent-dim:     rgba(15, 212, 184, 0.12);
+  --accent-glow:    rgba(15, 212, 184, 0.25);
+
+  /* Borders */
+  --border:         rgba(15, 212, 184, 0.1);
+  --border-hover:   rgba(15, 212, 184, 0.25);
+
+  /* Status */
+  --success: #10d48e;
+  --warning: #f5a623;
+  --danger:  #ff5470;
+
+  /* Gradient used across components */
+  --gradient-accent: linear-gradient(135deg, #0fd4b8 0%, #06c4a0 50%, #0aab8e 100%);
+  --gradient-dark:   linear-gradient(180deg, #071619 0%, #030d0e 100%);
 }
 
-* {
+/* ─── Reset ──────────────────────────────────────────────────────────────── */
+
+*, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
+/* ─── Body ───────────────────────────────────────────────────────────────── */
+
 body {
   background-color: var(--bg-primary);
+  /* Subtle animated noise texture for depth */
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(15, 212, 184, 0.04) 0%, transparent 60%);
   color: var(--text-primary);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   overflow-x: hidden;
+  min-height: 100vh;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+/* ─── Scrollbar ──────────────────────────────────────────────────────────── */
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb {
+  background: rgba(15, 212, 184, 0.2);
+  border-radius: 99px;
 }
+::-webkit-scrollbar-thumb:hover { background: rgba(15, 212, 184, 0.4); }
+
+/* ─── Links ──────────────────────────────────────────────────────────────── */
+
+a { color: inherit; text-decoration: none; }
+
+/* ─── Layout ─────────────────────────────────────────────────────────────── */
 
 .layout-container {
   display: flex;
@@ -39,37 +83,84 @@ a {
   flex: 1;
   padding: 2rem;
   overflow-y: auto;
+  /* Subtle grid dot pattern for depth */
+  background-image:
+    radial-gradient(circle, rgba(15,212,184,0.04) 1px, transparent 1px);
+  background-size: 28px 28px;
 }
 
-/* Utilities */
+/* ─── Card ───────────────────────────────────────────────────────────────── */
+
 .card {
-  background-color: var(--bg-secondary);
+  background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 1.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(15, 212, 184, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle top glow line on cards */
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(15,212,184,0.3), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 
 .card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+  transform: translateY(-3px);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(15,212,184,0.15),
+    inset 0 1px 0 rgba(15, 212, 184, 0.08);
+  border-color: var(--border-hover);
 }
+.card:hover::before { opacity: 1; }
+
+/* ─── Button ─────────────────────────────────────────────────────────────── */
 
 .btn {
-  padding: 0.75rem 1.5rem;
+  padding: 0.7rem 1.5rem;
   border-radius: 8px;
-  background-color: var(--accent);
-  color: white;
+  background: var(--gradient-accent);
+  color: #020c0b;
   border: none;
   cursor: pointer;
-  font-weight: 500;
-  transition: background-color 0.2s;
+  font-weight: 700;
+  font-size: 0.875rem;
+  letter-spacing: 0.01em;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 16px rgba(15, 212, 184, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.1);
+  opacity: 0;
+  transition: opacity 0.2s;
 }
 
 .btn:hover {
-  background-color: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(15, 212, 184, 0.45);
 }
+.btn:hover::after { opacity: 1; }
+.btn:active { transform: translateY(0); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* ─── Flex Utilities ─────────────────────────────────────────────────────── */
 
 .flex-between {
   display: flex;
@@ -77,15 +168,17 @@ a {
   align-items: center;
 }
 
+/* ─── Grid ───────────────────────────────────────────────────────────────── */
+
 .grid-3 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
 }
 
-.table-container {
-  overflow-x: auto;
-}
+/* ─── Table ──────────────────────────────────────────────────────────────── */
+
+.table-container { overflow-x: auto; }
 
 table {
   width: 100%;
@@ -93,64 +186,94 @@ table {
   margin-top: 1rem;
 }
 
-th,
-td {
-  padding: 1rem;
+th, td {
+  padding: 1rem 1.25rem;
   text-align: left;
   border-bottom: 1px solid var(--border);
 }
 
 th {
-  color: var(--text-secondary);
+  color: var(--accent);
   font-weight: 600;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
+  background: rgba(15, 212, 184, 0.03);
 }
 
 tr:hover td {
-  background-color: rgba(255, 255, 255, 0.03);
+  background-color: rgba(15, 212, 184, 0.03);
 }
+
+/* ─── Status Badges ──────────────────────────────────────────────────────── */
 
 .status {
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .status.active {
-  background-color: rgba(16, 185, 129, 0.1);
+  background-color: rgba(16, 212, 142, 0.12);
   color: var(--success);
+  border: 1px solid rgba(16, 212, 142, 0.2);
 }
 
 .status.inactive {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgba(255, 84, 112, 0.1);
   color: var(--danger);
+  border: 1px solid rgba(255, 84, 112, 0.2);
 }
 
-input {
+/* ─── Form Inputs ────────────────────────────────────────────────────────── */
+
+input, select, textarea {
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.75rem 1rem;
   border-radius: 8px;
-  background-color: var(--bg-tertiary);
+  background-color: rgba(7, 22, 25, 0.8);
   border: 1px solid var(--border);
   color: var(--text-primary);
   margin-bottom: 1rem;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  font-family: inherit;
+  font-size: 0.925rem;
 }
 
-input:focus {
+input::placeholder, textarea::placeholder {
+  color: var(--text-muted);
+}
+
+input:focus, select:focus, textarea:focus {
   border-color: var(--accent);
+  background-color: rgba(15, 212, 184, 0.04);
+  box-shadow: 0 0 0 3px rgba(15, 212, 184, 0.1);
 }
 
 label {
   display: block;
   margin-bottom: 0.5rem;
   color: var(--text-secondary);
-  font-size: 0.875rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
+
+/* ─── Page Headings ──────────────────────────────────────────────────────── */
+
+h2 {
+  background: linear-gradient(90deg, var(--text-primary) 0%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Auth layout (kept for compatibility) ───────────────────────────────── */
 
 .auth-container {
   display: flex;
@@ -162,4 +285,30 @@ label {
 .auth-card {
   width: 100%;
   max-width: 400px;
+}
+
+/* ─── Danger button variant ──────────────────────────────────────────────── */
+
+.btn-danger {
+  background: rgba(255, 84, 112, 0.15);
+  color: var(--danger);
+  border: 1px solid rgba(255, 84, 112, 0.25);
+  box-shadow: none;
+  font-weight: 600;
+}
+.btn-danger:hover {
+  background: rgba(255, 84, 112, 0.25);
+  box-shadow: 0 4px 16px rgba(255, 84, 112, 0.2);
+  color: #ff7a90;
+}
+
+/* ─── Fade-in animation for pages ────────────────────────────────────────── */
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.main-content > * {
+  animation: fadeInUp 0.3s ease both;
 }
