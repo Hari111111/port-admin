@@ -17,6 +17,7 @@ const Sidebar = () => {
     { href: '/blogs', label: 'Blogs', icon: '📝' },
     { href: '/projects', label: 'Projects', icon: '💻' },
     { href: '/resume-builder', label: 'Resume Builder', icon: '📄' },
+    { href: '/questions', label: 'Interview Q&A', icon: '❓' },
   ];
 
   const handleLogout = async () => {
