@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getProfile, updateProfile } from '@/services/profileService';
+import FileUpload from '@/components/FileUpload';
 import { ApiError } from '@/lib/api';
 
 export default function ProfilePage() {
@@ -225,9 +226,16 @@ export default function ProfilePage() {
                 {/* Other Details */}
                 <div className="card" style={{ marginBottom: '2rem' }}>
                     <h3 style={{ marginBottom: '1.5rem', color: 'var(--accent)', fontSize: '1.25rem' }}>Additional Info</h3>
-                    <div style={{ marginBottom: '1rem' }}>
-                        <label>Resume PDF Link</label>
-                        <input type="url" name="resumeLink" value={formData.resumeLink} onChange={handleChange} />
+                    <div>
+                        <FileUpload 
+                            type="pdf" 
+                            label="Resume PDF" 
+                            onUploadSuccess={(url) => setFormData(prev => ({ ...prev, resumeLink: url }))} 
+                        />
+                        <div style={{ marginTop: '-0.5rem', marginBottom: '1rem' }}>
+                            <label style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Or manually enter resume link</label>
+                            <input type="url" name="resumeLink" value={formData.resumeLink} onChange={handleChange} />
+                        </div>
                     </div>
                     <div style={{ marginBottom: '1rem' }}>
                         <label>Professional Summary (Bio)</label>

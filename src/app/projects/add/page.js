@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createProject } from '@/services/projectService';
+import FileUpload from '@/components/FileUpload';
 import { ApiError } from '@/lib/api';
 
 export default function AddProjectPage() {
@@ -61,15 +62,21 @@ export default function AddProjectPage() {
                     </div>
 
                     <div>
-                        <label>Thumbnail Image URL</label>
-                        <input
-                            type="url"
-                            name="image"
-                            value={formData.image}
-                            onChange={handleChange}
-                            required
-                            placeholder="https://example.com/project-thumb.jpg"
+                        <FileUpload 
+                            type="image" 
+                            label="Project Thumbnail" 
+                            onUploadSuccess={(url) => setFormData(prev => ({ ...prev, image: url }))} 
                         />
+                        <div style={{ marginTop: '-0.5rem', marginBottom: '1rem' }}>
+                            <label style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Or manually enter image URL</label>
+                            <input
+                                type="url"
+                                name="image"
+                                value={formData.image}
+                                onChange={handleChange}
+                                placeholder="https://example.com/project-thumb.jpg"
+                            />
+                        </div>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>

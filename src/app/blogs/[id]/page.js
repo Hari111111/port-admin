@@ -55,10 +55,13 @@ export default function ViewBlogPage() {
                     ← Back to List
                 </button>
 
-                <div style={{ display: 'flex', gap: '1rem' }}>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                     <span className="status active" style={{ backgroundColor: 'rgba(99, 102, 241, 0.1)', color: 'var(--accent)' }}>
                         {blog.category}
                     </span>
+                    <Link href={`/blogs/edit/${id}`}>
+                         <button className="btn btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}>Edit Post</button>
+                    </Link>
                 </div>
             </div>
 

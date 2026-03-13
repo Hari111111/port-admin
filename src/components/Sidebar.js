@@ -85,8 +85,8 @@ const Sidebar = () => {
       <style jsx>{`
         .sidebar {
           width: 260px;
-          background: linear-gradient(180deg, var(--bg-secondary) 0%, rgba(15,23,42,0.95) 100%);
-          border-right: 1px solid var(--border);
+          background: linear-gradient(180deg, #071a1e 0%, #030d0e 100%);
+          border-right: 1px solid rgba(15, 212, 184, 0.08);
           display: flex;
           flex-direction: column;
           height: 100vh;
@@ -95,9 +95,18 @@ const Sidebar = () => {
           overflow: hidden;
         }
 
+        /* Ambient teal glow strip on the right edge of sidebar */
+        .sidebar::after {
+          content: '';
+          position: absolute;
+          right: 0; top: 20%; bottom: 20%;
+          width: 1px;
+          background: linear-gradient(180deg, transparent, rgba(15,212,184,0.25), transparent);
+        }
+
         .logo-container {
           padding: 1.5rem 1.75rem;
-          border-bottom: 1px solid var(--border);
+          border-bottom: 1px solid rgba(15,212,184,0.08);
           display: flex;
           align-items: center;
           gap: 0.75rem;
@@ -106,16 +115,16 @@ const Sidebar = () => {
         .logo-icon {
           width: 34px;
           height: 34px;
-          background: linear-gradient(135deg, #6366f1, #8b5cf6);
+          background: linear-gradient(135deg, #0fd4b8, #06a88f);
           border-radius: 8px;
           display: flex;
           align-items: center;
           justify-content: center;
           font-weight: 800;
           font-size: 1rem;
-          color: white;
+          color: #020c0b;
           flex-shrink: 0;
-          box-shadow: 0 2px 10px rgba(99,102,241,0.3);
+          box-shadow: 0 2px 12px rgba(15,212,184,0.35);
         }
 
         .logo {
@@ -129,34 +138,37 @@ const Sidebar = () => {
           padding: 1.25rem 0.875rem;
           display: flex;
           flex-direction: column;
-          gap: 0.25rem;
+          gap: 0.2rem;
         }
 
         .nav-link {
           display: flex;
           align-items: center;
           gap: 0.875rem;
-          padding: 0.75rem 0.875rem;
+          padding: 0.7rem 0.875rem;
           border-radius: 10px;
-          color: var(--text-secondary);
+          color: rgba(127, 184, 180, 0.7);
           transition: all 0.2s ease;
           font-weight: 500;
-          font-size: 0.925rem;
+          font-size: 0.9rem;
           position: relative;
           text-decoration: none;
+          border: 1px solid transparent;
         }
 
         .nav-link:hover {
-          background-color: rgba(99, 102, 241, 0.08);
+          background: rgba(15, 212, 184, 0.06);
           color: var(--text-primary);
-          transform: translateX(2px);
+          transform: translateX(3px);
+          border-color: rgba(15,212,184,0.1);
         }
 
         .nav-link.active {
-          background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.15));
-          color: #a5b4fc;
-          border: 1px solid rgba(99,102,241,0.25);
+          background: linear-gradient(135deg, rgba(15,212,184,0.12), rgba(6,180,150,0.07));
+          color: #0fd4b8;
+          border-color: rgba(15,212,184,0.2);
           font-weight: 600;
+          box-shadow: inset 0 1px 0 rgba(15,212,184,0.1);
         }
 
         .active-indicator {
@@ -166,7 +178,13 @@ const Sidebar = () => {
           height: 6px;
           background: var(--accent);
           border-radius: 50%;
-          box-shadow: 0 0 8px rgba(99,102,241,0.6);
+          box-shadow: 0 0 10px rgba(15,212,184,0.8);
+          animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+          0%, 100% { box-shadow: 0 0 6px rgba(15,212,184,0.6); }
+          50% { box-shadow: 0 0 14px rgba(15,212,184,1); }
         }
 
         .icon { font-size: 1.1rem; }
@@ -174,7 +192,7 @@ const Sidebar = () => {
         /* User section */
         .user-section {
           padding: 1rem 0.875rem 1.25rem;
-          border-top: 1px solid var(--border);
+          border-top: 1px solid rgba(15,212,184,0.08);
           display: flex;
           flex-direction: column;
           gap: 0.75rem;
@@ -185,8 +203,8 @@ const Sidebar = () => {
           align-items: center;
           gap: 0.75rem;
           padding: 0.625rem 0.75rem;
-          background: rgba(99,102,241,0.07);
-          border: 1px solid rgba(99,102,241,0.15);
+          background: rgba(15,212,184,0.05);
+          border: 1px solid rgba(15,212,184,0.12);
           border-radius: 10px;
         }
 
@@ -194,15 +212,15 @@ const Sidebar = () => {
           width: 36px;
           height: 36px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #6366f1, #8b5cf6);
+          background: linear-gradient(135deg, #0fd4b8, #06a88f);
           display: flex;
           align-items: center;
           justify-content: center;
           font-size: 0.8rem;
           font-weight: 700;
-          color: white;
+          color: #020c0b;
           flex-shrink: 0;
-          box-shadow: 0 2px 8px rgba(99,102,241,0.3);
+          box-shadow: 0 2px 10px rgba(15,212,184,0.3);
         }
 
         .user-info { overflow: hidden; }
@@ -218,8 +236,9 @@ const Sidebar = () => {
 
         .user-role {
           font-size: 0.75rem;
-          color: var(--text-secondary);
+          color: var(--accent);
           margin-top: 0.1rem;
+          font-weight: 600;
         }
 
         .logout-btn {
@@ -230,9 +249,9 @@ const Sidebar = () => {
           width: 100%;
           padding: 0.65rem;
           border-radius: 10px;
-          background: rgba(239, 68, 68, 0.08);
-          border: 1px solid rgba(239, 68, 68, 0.2);
-          color: #fca5a5;
+          background: rgba(255, 84, 112, 0.08);
+          border: 1px solid rgba(255, 84, 112, 0.18);
+          color: rgba(255,120,140,0.9);
           font-size: 0.875rem;
           font-weight: 500;
           cursor: pointer;
@@ -241,21 +260,22 @@ const Sidebar = () => {
         }
 
         .logout-btn:hover:not(:disabled) {
-          background: rgba(239, 68, 68, 0.15);
-          border-color: rgba(239, 68, 68, 0.35);
-          color: #f87171;
+          background: rgba(255, 84, 112, 0.15);
+          border-color: rgba(255, 84, 112, 0.3);
+          color: #ff5470;
+          box-shadow: 0 2px 12px rgba(255,84,112,0.15);
         }
 
         .logout-btn:disabled {
-          opacity: 0.6;
+          opacity: 0.5;
           cursor: not-allowed;
         }
 
         .logout-spinner {
           width: 16px;
           height: 16px;
-          border: 2px solid rgba(252,165,165,0.3);
-          border-top-color: #fca5a5;
+          border: 2px solid rgba(255,120,140,0.25);
+          border-top-color: rgba(255,120,140,0.9);
           border-radius: 50%;
           animation: spin 0.7s linear infinite;
           display: inline-block;

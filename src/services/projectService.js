@@ -3,7 +3,7 @@
  * All API calls related to /api/projects
  */
 
-import { apiGet, apiPost, apiDelete } from '@/lib/api';
+import { apiGet, apiPost, apiDelete, apiPut } from '@/lib/api';
 
 const ENDPOINT = '/projects';
 
@@ -26,6 +26,14 @@ export const getProjectById = (id) => apiGet(`${ENDPOINT}/${id}`);
  * @returns {Promise<object>}
  */
 export const createProject = (projectData) => apiPost(ENDPOINT, projectData);
+
+/**
+ * Update an existing project
+ * @param {string} id
+ * @param {object} projectData
+ * @returns {Promise<object>}
+ */
+export const updateProject = (id, projectData) => apiPut(`${ENDPOINT}/${id}`, projectData);
 
 /**
  * Delete a project by ID

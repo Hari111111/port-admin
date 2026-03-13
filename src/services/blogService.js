@@ -3,7 +3,7 @@
  * All API calls related to /api/blogs
  */
 
-import { apiGet, apiPost, apiDelete } from '@/lib/api';
+import { apiGet, apiPost, apiDelete, apiPut } from '@/lib/api';
 
 const ENDPOINT = '/blogs';
 
@@ -26,6 +26,14 @@ export const getBlogById = (id) => apiGet(`${ENDPOINT}/${id}`);
  * @returns {Promise<object>}
  */
 export const createBlog = (blogData) => apiPost(ENDPOINT, blogData);
+
+/**
+ * Update an existing blog post
+ * @param {string} id
+ * @param {object} blogData
+ * @returns {Promise<object>}
+ */
+export const updateBlog = (id, blogData) => apiPut(`${ENDPOINT}/${id}`, blogData);
 
 /**
  * Delete a blog post by ID

@@ -1,14 +1,18 @@
 "use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import Editor from '@/components/Editor';
 import FileUpload from '@/components/FileUpload';
-import { createBlog } from '@/services/blogService';
+import { getBlogById, updateBlog } from '@/services/blogService';
 import { ApiError } from '@/lib/api';
 
-export default function AddBlogPage() {
+export default function EditBlogPage() {
+    const params = useParams();
     const router = useRouter();
+    const { id } = params;
+
+    const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [formData, setFormData] = useState({
         title: '',
@@ -20,18 +24,35 @@ export default function AddBlogPage() {
         tags: '',
     });
 
+    useEffect(() => {
+        if (id) {
+            fetchBlogDetails();
+        }
+    }, [id]);
+
+    const fetchBlogDetails = async () => {
+        try {
+            const data = await getBlogById(id);
+            setFormData({
+                title: data.title || '',
+                slug: data.slug || '',
+                image: data.image || '',
+                category: data.category || '',
+                description: data.description || '',
+                content: data.content || '',
+                tags: data.tags ? data.tags.join(', ') : '',
+            });
+        } catch (err) {
+            alert('Failed to load blog details');
+            router.push('/blogs');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prev) => {
-            if (name === 'title') {
-                return {
-                    ...prev,
-                    title: value,
-                    slug: value.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '')
-                };
-            }
-            return { ...prev, [name]: value };
-        });
+        setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
     const handleContentChange = (value) => {
@@ -42,21 +63,23 @@ export default function AddBlogPage() {
         e.preventDefault();
         setSubmitting(true);
         try {
-            await createBlog({
+            await updateBlog(id, {
                 ...formData,
                 tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean),
             });
             router.push('/blogs');
         } catch (err) {
-            alert('Error: ' + (err instanceof ApiError ? err.message : err.message));
+            alert('Error updating blog: ' + (err instanceof ApiError ? err.message : err.message));
         } finally {
             setSubmitting(false);
         }
     };
 
+    if (loading) return <div style={{ padding: '2rem' }}>Loading blog data...</div>;
+
     return (
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-            <h2 style={{ fontSize: '1.875rem', fontWeight: 700, marginBottom: '2rem' }}>Add New Blog Post</h2>
+            <h2 style={{ fontSize: '1.875rem', fontWeight: 700, marginBottom: '2rem' }}>Edit Blog Post</h2>
 
             <div className="card">
                 <form onSubmit={handleSubmit}>
@@ -68,7 +91,6 @@ export default function AddBlogPage() {
                             value={formData.title}
                             onChange={handleChange}
                             required
-                            placeholder="Enter blog title"
                         />
                     </div>
 
@@ -81,7 +103,6 @@ export default function AddBlogPage() {
                                 value={formData.slug}
                                 onChange={handleChange}
                                 required
-                                placeholder="url-friendly-slug"
                             />
                         </div>
                         <div>
@@ -92,7 +113,6 @@ export default function AddBlogPage() {
                                 value={formData.category}
                                 onChange={handleChange}
                                 required
-                                placeholder="Technology"
                             />
                         </div>
                     </div>
@@ -103,6 +123,11 @@ export default function AddBlogPage() {
                             label="Blog Image" 
                             onUploadSuccess={(url) => setFormData(prev => ({ ...prev, image: url }))} 
                         />
+                         {formData.image && (
+                            <div style={{ marginBottom: '1rem' }}>
+                                <img src={formData.image} alt="Preview" style={{ width: '100px', height: '60px', objectFit: 'cover', borderRadius: '4px' }} />
+                            </div>
+                        )}
                         <div style={{ marginTop: '-0.5rem', marginBottom: '1rem' }}>
                             <label style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Or manually enter image URL</label>
                             <input
@@ -133,7 +158,6 @@ export default function AddBlogPage() {
                                 marginBottom: '1rem',
                                 outline: 'none',
                             }}
-                            placeholder="Brief summary for list view and meta tags"
                         />
                     </div>
 
@@ -174,7 +198,7 @@ export default function AddBlogPage() {
                             Cancel
                         </button>
                         <button type="submit" className="btn" disabled={submitting}>
-                            {submitting ? 'Publishing...' : 'Publish Post'}
+                            {submitting ? 'Saving...' : 'Save Changes'}
                         </button>
                     </div>
                 </form>

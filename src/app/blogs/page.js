@@ -93,6 +93,9 @@ export default function BlogsPage() {
                                             <Link href={`/blogs/${blog._id}`}>
                                                 <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)' }}>View</button>
                                             </Link>
+                                            <Link href={`/blogs/edit/${blog._id}`}>
+                                                <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--success)' }}>Edit</button>
+                                            </Link>
                                             <button
                                                 onClick={() => handleDelete(blog._id)}
                                                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger)' }}
