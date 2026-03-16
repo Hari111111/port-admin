@@ -17,6 +17,7 @@ export default function EditQuestionPage() {
         category: 'Frontend',
         type: 'Long',
         difficulty: 'Medium',
+        priority: 0,
         options: ['', '', '', ''],
     });
 
@@ -173,6 +174,17 @@ export default function EditQuestionPage() {
                                 <option value="Medium">Medium</option>
                                 <option value="Hard">Hard</option>
                             </select>
+                        </div>
+                        <div>
+                            <label>Priority (Lower = Top)</label>
+                            <input
+                                type="number"
+                                name="priority"
+                                value={formData.priority}
+                                onChange={handleChange}
+                                placeholder="0"
+                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border)', color: 'var(--text-primary)', marginBottom: '1rem' }}
+                            />
                         </div>
                     </div>
 

@@ -66,6 +66,7 @@ export default function QuestionsPage() {
                                 <th>Category</th>
                                 <th>Type</th>
                                 <th>Difficulty</th>
+                                <th>Priority</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -91,6 +92,7 @@ export default function QuestionsPage() {
                                             {q.difficulty}
                                         </span>
                                     </td>
+                                    <td style={{ textAlign: 'center', fontWeight: 700, color: 'var(--accent)' }}>{q.priority}</td>
                                     <td>
                                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                                             <Link href={`/questions/edit/${q._id}`}>

@@ -77,11 +77,155 @@ function LayoutContent({ children }) {
 
     // Authenticated — render with sidebar
     return (
-        <div className="layout-container">
+        <div className="admin-layout">
             <Sidebar />
-            <main className="main-content">
-                {children}
-            </main>
+            <div className="app-wrapper">
+                <header className="app-header">
+                    <div className="header-left">
+                        <div className="breadcrumb">
+                            <span className="root">Admin</span>
+                            <span className="separator">/</span>
+                            <span className="current">{pathname === '/' ? 'Dashboard' : pathname.slice(1).charAt(0).toUpperCase() + pathname.slice(2)}</span>
+                        </div>
+                    </div>
+                    <div className="header-right">
+                        <div className="search-bar">
+                            <span className="search-icon">🔍</span>
+                            <input type="text" placeholder="Search anything..." />
+                        </div>
+                        <div className="header-actions">
+                            <button className="action-icon-btn">🔔<span className="badge"></span></button>
+                            <button className="action-icon-btn">⚙️</button>
+                        </div>
+                    </div>
+                </header>
+                <main className="main-content">
+                    {children}
+                </main>
+            </div>
+            <style jsx>{`
+                .admin-layout {
+                    display: flex;
+                    min-height: 100vh;
+                    background: var(--bg-primary);
+                }
+                .app-wrapper {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    min-width: 0;
+                    height: 100vh;
+                    overflow: hidden;
+                }
+                .app-header {
+                    height: 70px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 0 2.5rem;
+                    background: rgba(255, 255, 255, 0.8);
+                    backdrop-filter: blur(16px);
+                    -webkit-backdrop-filter: blur(16px);
+                    border-bottom: 2px solid var(--bg-primary);
+                    z-index: 100;
+                }
+                .header-left .breadcrumb {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                }
+                .breadcrumb .root {
+                    font-size: 0.8rem;
+                    font-weight: 600;
+                    color: var(--text-muted);
+                    text-transform: uppercase;
+                    letter-spacing: 0.1em;
+                }
+                .breadcrumb .separator {
+                    color: var(--text-muted);
+                    font-size: 0.8rem;
+                }
+                .breadcrumb .current {
+                    font-size: 0.95rem;
+                    font-weight: 700;
+                    color: var(--text-primary);
+                }
+                .header-right {
+                    display: flex;
+                    align-items: center;
+                    gap: 2rem;
+                }
+                .search-bar {
+                    background: var(--bg-primary);
+                    border: 1px solid var(--border);
+                    border-radius: 14px;
+                    padding: 0.5rem 1rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                    width: 300px;
+                    transition: all 0.3s ease;
+                }
+                .search-bar:focus-within {
+                    width: 350px;
+                    border-color: var(--accent);
+                    background: var(--bg-secondary);
+                    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+                }
+                .search-bar input {
+                    background: transparent;
+                    border: none;
+                    margin: 0;
+                    padding: 0;
+                    font-size: 0.85rem;
+                    width: 100%;
+                    color: var(--text-primary);
+                }
+                .search-bar input::placeholder { color: var(--text-muted); }
+                .header-actions {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                }
+                .action-icon-btn {
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 10px;
+                    background: var(--bg-tertiary);
+                    border: 1px solid var(--border);
+                    color: var(--text-secondary);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    position: relative;
+                }
+                .action-icon-btn:hover {
+                    background: var(--accent-dim);
+                    border-color: var(--accent);
+                    color: var(--accent);
+                    transform: translateY(-2px);
+                }
+                .badge {
+                    position: absolute;
+                    top: 10px;
+                    right: 10px;
+                    width: 6px;
+                    height: 6px;
+                    background: var(--danger);
+                    border-radius: 50%;
+                    box-shadow: 0 0 8px var(--danger);
+                }
+                .main-content {
+                    flex: 1;
+                    padding: 2.5rem;
+                    overflow-y: auto;
+                    background-image: 
+                        radial-gradient(circle at top right, rgba(37, 99, 235, 0.03), transparent 500px),
+                        radial-gradient(circle at bottom left, rgba(37, 99, 235, 0.02), transparent 500px);
+                }
+            `}</style>
         </div>
     );
 }

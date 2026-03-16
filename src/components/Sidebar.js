@@ -10,14 +10,29 @@ const Sidebar = () => {
   const { user, logout } = useAuth();
   const [loggingOut, setLoggingOut] = useState(false);
 
-  const links = [
-    { href: '/', label: 'Dashboard', icon: '📊' },
-    { href: '/profile', label: 'Profile', icon: '👤' },
-    { href: '/users', label: 'Users', icon: '👥' },
-    { href: '/blogs', label: 'Blogs', icon: '📝' },
-    { href: '/projects', label: 'Projects', icon: '💻' },
-    { href: '/resume-builder', label: 'Resume Builder', icon: '📄' },
-    { href: '/questions', label: 'Interview Q&A', icon: '❓' },
+  const menuGroups = [
+    {
+      title: 'Main',
+      links: [
+        { href: '/', label: 'Dashboard', icon: '📊' },
+        { href: '/profile', label: 'Profile', icon: '👤' },
+        { href: '/users', label: 'Users', icon: '👥' },
+      ]
+    },
+    {
+      title: 'Content',
+      links: [
+        { href: '/blogs', label: 'Blogs', icon: '📝' },
+        { href: '/projects', label: 'Projects', icon: '💻' },
+      ]
+    },
+    {
+      title: 'Tools',
+      links: [
+        { href: '/resume-builder', label: 'Resume Builder', icon: '📄' },
+        { href: '/questions', label: 'Interview Q&A', icon: '❓' },
+      ]
+    }
   ];
 
   const handleLogout = async () => {
@@ -40,16 +55,21 @@ const Sidebar = () => {
 
       {/* Nav links */}
       <nav className="nav">
-        {links.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className={`nav-link ${pathname === link.href ? 'active' : ''}`}
-          >
-            <span className="icon">{link.icon}</span>
-            {link.label}
-            {pathname === link.href && <span className="active-indicator" />}
-          </Link>
+        {menuGroups.map((group) => (
+          <div key={group.title} className="menu-group">
+            <h3 className="group-title">{group.title}</h3>
+            {group.links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`nav-link ${pathname === link.href ? 'active' : ''}`}
+              >
+                <span className="icon">{link.icon}</span>
+                <span className="label">{link.label}</span>
+                {pathname === link.href && <span className="active-glow" />}
+              </Link>
+            ))}
+          </div>
         ))}
       </nav>
 
@@ -85,186 +105,168 @@ const Sidebar = () => {
 
       <style jsx>{`
         .sidebar {
-          width: 260px;
-          background: linear-gradient(180deg, #071a1e 0%, #030d0e 100%);
-          border-right: 1px solid rgba(15, 212, 184, 0.08);
+          width: 280px;
+          background: var(--bg-secondary);
+          border-right: 1px solid var(--border);
           display: flex;
           flex-direction: column;
           height: 100vh;
           position: sticky;
           top: 0;
           overflow: hidden;
-        }
-
-        /* Ambient teal glow strip on the right edge of sidebar */
-        .sidebar::after {
-          content: '';
-          position: absolute;
-          right: 0; top: 20%; bottom: 20%;
-          width: 1px;
-          background: linear-gradient(180deg, transparent, rgba(15,212,184,0.25), transparent);
+          transition: all 0.3s ease;
         }
 
         .logo-container {
-          padding: 1.5rem 1.75rem;
-          border-bottom: 1px solid rgba(15,212,184,0.08);
+          padding: 2rem 1.75rem;
           display: flex;
           align-items: center;
-          gap: 0.75rem;
+          gap: 1rem;
         }
 
         .logo-icon {
-          width: 34px;
-          height: 34px;
-          background: linear-gradient(135deg, #0fd4b8, #06a88f);
-          border-radius: 8px;
+          width: 42px;
+          height: 42px;
+          background: var(--gradient-accent);
+          border-radius: 12px;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-weight: 800;
-          font-size: 1rem;
-          color: #020c0b;
-          flex-shrink: 0;
-          box-shadow: 0 2px 12px rgba(15,212,184,0.35);
+          font-weight: 900;
+          font-size: 1.25rem;
+          color: white;
+          box-shadow: 0 8px 24px rgba(37, 99, 235, 0.25);
         }
 
         .logo {
-          font-size: 1.25rem;
-          font-weight: 700;
+          font-size: 1.5rem;
+          font-weight: 800;
           color: var(--text-primary);
-          letter-spacing: -0.02em;
+          letter-spacing: -0.03em;
         }
 
         .nav {
-          padding: 1.25rem 0.875rem;
+          padding: 0 1.25rem;
           display: flex;
           flex-direction: column;
-          gap: 0.2rem;
+          gap: 1.75rem;
+          overflow-y: auto;
+        }
+
+        .menu-group {
+          display: flex;
+          flex-direction: column;
+          gap: 0.35rem;
+        }
+
+        .group-title {
+          font-size: 0.7rem;
+          font-weight: 800;
+          text-transform: uppercase;
+          color: var(--text-muted);
+          letter-spacing: 0.15em;
+          margin-bottom: 0.5rem;
+          padding-left: 0.75rem;
         }
 
         .nav-link {
           display: flex;
           align-items: center;
-          gap: 0.875rem;
-          padding: 0.7rem 0.875rem;
-          border-radius: 10px;
-          color: rgba(127, 184, 180, 0.7);
-          transition: all 0.2s ease;
+          gap: 1rem;
+          padding: 0.85rem 1rem;
+          border-radius: 14px;
+          color: var(--text-secondary);
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           font-weight: 500;
-          font-size: 0.9rem;
+          font-size: 0.925rem;
           position: relative;
           text-decoration: none;
-          border: 1px solid transparent;
         }
 
         .nav-link:hover {
-          background: rgba(15, 212, 184, 0.06);
+          background: var(--bg-tertiary);
           color: var(--text-primary);
-          transform: translateX(3px);
-          border-color: rgba(15,212,184,0.1);
+          transform: translateX(4px);
         }
 
         .nav-link.active {
-          background: linear-gradient(135deg, rgba(15,212,184,0.12), rgba(6,180,150,0.07));
-          color: #0fd4b8;
-          border-color: rgba(15,212,184,0.2);
-          font-weight: 600;
-          box-shadow: inset 0 1px 0 rgba(15,212,184,0.1);
+          background: var(--accent-dim);
+          color: var(--accent);
+          font-weight: 700;
         }
 
-        .active-indicator {
+        .active-glow {
           position: absolute;
-          right: 0.75rem;
-          width: 6px;
-          height: 6px;
+          left: 0;
+          width: 3px;
+          height: 20px;
           background: var(--accent);
-          border-radius: 50%;
-          box-shadow: 0 0 10px rgba(15,212,184,0.8);
-          animation: pulse 2s ease-in-out infinite;
+          border-radius: 0 4px 4px 0;
+          box-shadow: 0 0 12px var(--accent);
         }
 
-        @keyframes pulse {
-          0%, 100% { box-shadow: 0 0 6px rgba(15,212,184,0.6); }
-          50% { box-shadow: 0 0 14px rgba(15,212,184,1); }
-        }
-
-        .icon { font-size: 1.1rem; }
-
-        /* User section */
         .user-section {
-          padding: 1rem 0.875rem 1.25rem;
-          border-top: 1px solid rgba(15,212,184,0.08);
-          display: flex;
-          flex-direction: column;
-          gap: 0.75rem;
+          padding: 1.5rem;
+          margin-top: auto;
+          background: var(--bg-primary);
+          border-top: 1px solid var(--border);
         }
 
         .user-card {
           display: flex;
           align-items: center;
-          gap: 0.75rem;
-          padding: 0.625rem 0.75rem;
-          background: rgba(15,212,184,0.05);
-          border: 1px solid rgba(15,212,184,0.12);
-          border-radius: 10px;
+          gap: 1rem;
+          margin-bottom: 1.25rem;
         }
 
         .user-avatar {
-          width: 36px;
-          height: 36px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #0fd4b8, #06a88f);
+          width: 44px;
+          height: 44px;
+          border-radius: 14px;
+          background: var(--gradient-accent);
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 0.8rem;
-          font-weight: 700;
-          color: #020c0b;
-          flex-shrink: 0;
-          box-shadow: 0 2px 10px rgba(15,212,184,0.3);
+          font-size: 1rem;
+          font-weight: 800;
+          color: white;
+          box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
         }
 
-        .user-info { overflow: hidden; }
-
         .user-name {
-          font-size: 0.875rem;
-          font-weight: 600;
+          font-size: 0.95rem;
+          font-weight: 700;
           color: var(--text-primary);
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
         }
 
         .user-role {
           font-size: 0.75rem;
           color: var(--accent);
-          margin-top: 0.1rem;
           font-weight: 600;
+          opacity: 0.8;
         }
 
         .logout-btn {
+          width: 100%;
+          padding: 0.85rem;
+          border-radius: 12px;
+          background: rgba(255, 84, 112, 0.08);
+          border: 1px solid rgba(255, 84, 112, 0.15);
+          color: #ff5470;
+          font-weight: 700;
+          font-size: 0.875rem;
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 0.5rem;
-          width: 100%;
-          padding: 0.65rem;
-          border-radius: 10px;
-          background: rgba(255, 84, 112, 0.08);
-          border: 1px solid rgba(255, 84, 112, 0.18);
-          color: rgba(255,120,140,0.9);
-          font-size: 0.875rem;
-          font-weight: 500;
+          gap: 0.75rem;
           cursor: pointer;
-          transition: all 0.2s;
-          min-height: 40px;
+          transition: all 0.2s ease;
         }
 
         .logout-btn:hover:not(:disabled) {
-          background: rgba(255, 84, 112, 0.15);
-          border-color: rgba(255, 84, 112, 0.3);
-          color: #ff5470;
-          box-shadow: 0 2px 12px rgba(255,84,112,0.15);
+          background: #ff5470;
+          color: white;
+          box-shadow: 0 8px 16px rgba(255, 84, 112, 0.25);
         }
 
         .logout-btn:disabled {
