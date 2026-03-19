@@ -2,10 +2,18 @@ import { apiGet, apiPost, apiPut, apiDelete } from '@/lib/api';
 
 const ENDPOINT = '/questions';
 
-export const getAllQuestions = async (category = '') => {
-  const url = category ? `${ENDPOINT}?category=${category}` : ENDPOINT;
+export const getAllQuestions = async (params = {}) => {
+  const query = new URLSearchParams();
+  Object.keys(params).forEach(key => {
+    if (params[key]) {
+      query.append(key, params[key]);
+    }
+  });
+  
+  const queryString = query.toString();
+  const url = queryString ? `${ENDPOINT}?${queryString}` : ENDPOINT;
   const response = await apiGet(url);
-  return response.data;
+  return response; // we now return the whole response object for pagination metadata
 };
 
 export const getQuestionById = async (id) => {

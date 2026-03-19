@@ -12,16 +12,30 @@ export default function AddQuestionPage() {
     const [formData, setFormData] = useState({
         question: '',
         answer: '',
-        language: 'JavaScript',
+        category: [],
+        language: ['JavaScript'],
         type: 'Long',
         difficulty: 'Medium',
         priority: 0,
         options: ['', '', '', ''],
     });
 
+    const categories = ['Frontend', 'Backend', 'Database', 'DevOps', 'Programming', 'General', 'Other'];
+    const languages = ['JavaScript', 'TypeScript', 'React.js', 'Next.js', 'Node.js', 'NestJS', 'MongoDB', 'PostgreSQL', 'Python', 'Java', 'C++', 'PHP', 'HTML/CSS', 'SQL', 'Other'];
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleCheckboxChange = (name, value) => {
+        setFormData(prev => {
+            const current = prev[name] || [];
+            const updated = current.includes(value)
+                ? current.filter(item => item !== value)
+                : [...current, value];
+            return { ...prev, [name]: updated };
+        });
     };
 
     const handleOptionChange = (index, value) => {
@@ -36,6 +50,12 @@ export default function AddQuestionPage() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        if (formData.category.length === 0) {
+            alert('Please select at least one category');
+            return;
+        }
+
         setSubmitting(true);
         try {
             const dataToSubmit = { ...formData };
@@ -43,6 +63,11 @@ export default function AddQuestionPage() {
                 delete dataToSubmit.options;
             } else {
                 dataToSubmit.options = dataToSubmit.options.filter(opt => opt.trim() !== '');
+            }
+
+            // If priority is 0 or empty, let the backend handle it
+            if (parseInt(dataToSubmit.priority) === 0) {
+                delete dataToSubmit.priority;
             }
 
             await createQuestion(dataToSubmit);
@@ -55,13 +80,13 @@ export default function AddQuestionPage() {
     };
 
     return (
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem' }}>
             <h2 style={{ fontSize: '1.875rem', fontWeight: 700, marginBottom: '2rem' }}>Add New Question</h2>
 
-            <div className="card">
+            <div className="card" style={{ padding: '2rem' }}>
                 <form onSubmit={handleSubmit}>
-                    <div>
-                        <label>Question</label>
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Question Content</label>
                         <textarea
                             name="question"
                             value={formData.question}
@@ -76,62 +101,51 @@ export default function AddQuestionPage() {
                                 backgroundColor: 'var(--bg-tertiary)',
                                 border: '1px solid var(--border)',
                                 color: 'var(--text-primary)',
-                                marginBottom: '1rem',
                                 outline: 'none',
                             }}
                         />
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                        <div>
-                            <label>Category</label>
-                            <select
-                                name="category"
-                                value={formData.category}
-                                onChange={handleChange}
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border)', color: 'var(--text-primary)', marginBottom: '1rem' }}
-                            >
-                                <option value="Frontend">Frontend</option>
-                                <option value="Backend">Backend</option>
-                                <option value="Database">Database</option>
-                                <option value="DevOps">DevOps</option>
-                                <option value="Programming">Programming</option>
-                                <option value="General">General</option>
-                                <option value="Other">Other</option>
-                            </select>
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Categories (Select one or more)</label>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', padding: '1rem', backgroundColor: 'var(--bg-tertiary)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                            {categories.map(cat => (
+                                <label key={cat} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem' }}>
+                                    <input 
+                                        type="checkbox" 
+                                        checked={formData.category.includes(cat)} 
+                                        onChange={() => handleCheckboxChange('category', cat)}
+                                    />
+                                    {cat}
+                                </label>
+                            ))}
                         </div>
-                        <div>
-                            <label>Language</label>
-                            <select
-                                name="language"
-                                value={formData.language}
-                                onChange={handleChange}
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border)', color: 'var(--text-primary)', marginBottom: '1rem' }}
-                            >
-                                <option value="JavaScript">JavaScript</option>
-                                <option value="TypeScript">TypeScript</option>
-                                <option value="React.js">React.js</option>
-                                <option value="Next.js">Next.js</option>
-                                <option value="Node.js">Node.js</option>
-                                <option value="NestJS">NestJS</option>
-                                <option value="MongoDB">MongoDB</option>
-                                <option value="PostgreSQL">PostgreSQL</option>
-                                <option value="Python">Python</option>
-                                <option value="Java">Java</option>
-                                <option value="C++">C++</option>
-                                <option value="PHP">PHP</option>
-                                <option value="HTML/CSS">HTML/CSS</option>
-                                <option value="SQL">SQL</option>
-                                <option value="Other">Other</option>
-                            </select>
+                    </div>
+
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Languages / Technologies</label>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', padding: '1rem', backgroundColor: 'var(--bg-tertiary)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                            {languages.map(lang => (
+                                <label key={lang} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem' }}>
+                                    <input 
+                                        type="checkbox" 
+                                        checked={formData.language.includes(lang)} 
+                                        onChange={() => handleCheckboxChange('language', lang)}
+                                    />
+                                    {lang}
+                                </label>
+                            ))}
                         </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
                         <div>
-                            <label>Type</label>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Question Type</label>
                             <select
                                 name="type"
                                 value={formData.type}
                                 onChange={handleChange}
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border)', color: 'var(--text-primary)', marginBottom: '1rem' }}
+                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                             >
                                 <option value="Short">Short Answer</option>
                                 <option value="Long">Long Answer / Descriptive</option>
@@ -139,12 +153,12 @@ export default function AddQuestionPage() {
                             </select>
                         </div>
                         <div>
-                            <label>Difficulty</label>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Difficulty Level</label>
                             <select
                                 name="difficulty"
                                 value={formData.difficulty}
                                 onChange={handleChange}
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border)', color: 'var(--text-primary)', marginBottom: '1rem' }}
+                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                             >
                                 <option value="Easy">Easy</option>
                                 <option value="Medium">Medium</option>
@@ -152,15 +166,16 @@ export default function AddQuestionPage() {
                             </select>
                         </div>
                         <div>
-                            <label>Priority (Lower = Higher Periority)</label>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Priority Number</label>
                             <input
                                 type="number"
                                 name="priority"
                                 value={formData.priority}
                                 onChange={handleChange}
-                                placeholder="e.g. 1"
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border)', color: 'var(--text-primary)', marginBottom: '1rem' }}
+                                placeholder="0 for auto-assign"
+                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                             />
+                            <small style={{ color: 'var(--text-secondary)', marginTop: '0.25rem', display: 'block' }}>Set to 0 for automatic priority based on category</small>
                         </div>
                     </div>
 
