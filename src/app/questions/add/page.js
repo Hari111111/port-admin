@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Editor from '@/components/Editor';
-import { createQuestion } from '@/services/questionService';
+import { createQuestion, generateQuestionDraft } from '@/services/questionService';
 import { ApiError } from '@/lib/api';
 
 export default function AddQuestionPage() {
     const router = useRouter();
     const [submitting, setSubmitting] = useState(false);
+    const [generating, setGenerating] = useState(false);
     const [formData, setFormData] = useState({
         question: '',
         answer: '',
@@ -19,6 +20,7 @@ export default function AddQuestionPage() {
         priority: 0,
         options: ['', '', '', ''],
     });
+    const [aiTopic, setAiTopic] = useState('');
 
     const categories = ['Frontend', 'Backend', 'Database', 'DevOps', 'Programming', 'General', 'Other'];
     const languages = ['JavaScript', 'TypeScript', 'React.js', 'Next.js', 'Node.js', 'NestJS', 'MongoDB', 'PostgreSQL', 'Python', 'Java', 'C++', 'PHP', 'HTML/CSS', 'SQL', 'Other'];
@@ -46,6 +48,40 @@ export default function AddQuestionPage() {
 
     const handleAnswerChange = (value) => {
         setFormData((prev) => ({ ...prev, answer: value }));
+    };
+
+    const handleGenerateQuestion = async () => {
+        if (!aiTopic.trim()) {
+            alert('Please enter a topic for the AI interview question');
+            return;
+        }
+
+        setGenerating(true);
+        try {
+            const data = await generateQuestionDraft({
+                topic: aiTopic,
+                category: formData.category,
+                language: formData.language,
+                type: formData.type,
+                difficulty: formData.difficulty,
+            });
+
+            setFormData((prev) => ({
+                ...prev,
+                question: data.question || '',
+                answer: data.answer || '',
+                category: Array.isArray(data.category) && data.category.length ? data.category : [],
+                language: Array.isArray(data.language) && data.language.length ? data.language : [],
+                type: data.type || 'Long',
+                difficulty: data.difficulty || 'Medium',
+                priority: Number.isFinite(Number(data.priority)) ? Number(data.priority) : 0,
+                options: Array.isArray(data.options) && data.options.length ? [...data.options, '', '', '', ''].slice(0, 4) : ['', '', '', ''],
+            }));
+        } catch (err) {
+            alert('AI Error: ' + (err instanceof ApiError ? err.message : err.message));
+        } finally {
+            setGenerating(false);
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -84,6 +120,38 @@ export default function AddQuestionPage() {
             <h2 style={{ fontSize: '1.875rem', fontWeight: 700, marginBottom: '2rem' }}>Add New Question</h2>
 
             <div className="card" style={{ padding: '2rem' }}>
+                <div style={{ marginBottom: '2rem', padding: '1.25rem', borderRadius: '12px', border: '1px solid var(--border)', backgroundColor: 'var(--bg-secondary)' }}>
+                    <h3 style={{ marginBottom: '0.5rem', fontSize: '1.1rem' }}>AI Interview Question Generator</h3>
+                    <p style={{ marginBottom: '1rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                        Topic do, AI question, answer, category, language, type, difficulty, priority aur MCQ options tak fields me fill kar dega.
+                    </p>
+                    <div style={{ display: 'grid', gap: '1rem' }}>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Topic</label>
+                            <textarea
+                                value={aiTopic}
+                                onChange={(e) => setAiTopic(e.target.value)}
+                                rows="4"
+                                placeholder="e.g. Create a senior-level React interview question on reconciliation with a detailed answer, medium difficulty, and include MCQ options if relevant."
+                                style={{
+                                    width: '100%',
+                                    padding: '0.75rem',
+                                    borderRadius: '8px',
+                                    backgroundColor: 'var(--bg-tertiary)',
+                                    border: '1px solid var(--border)',
+                                    color: 'var(--text-primary)',
+                                    outline: 'none',
+                                }}
+                            />
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <button type="button" className="btn" onClick={handleGenerateQuestion} disabled={generating}>
+                                {generating ? 'Filling Fields...' : 'Fill Form With AI'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <form onSubmit={handleSubmit}>
                     <div style={{ marginBottom: '1.5rem' }}>
                         <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Question Content</label>

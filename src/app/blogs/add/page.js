@@ -4,12 +4,19 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Editor from '@/components/Editor';
 import FileUpload from '@/components/FileUpload';
-import { createBlog } from '@/services/blogService';
+import { createBlog, generateBlogDraft } from '@/services/blogService';
 import { ApiError } from '@/lib/api';
 
 export default function AddBlogPage() {
     const router = useRouter();
     const [submitting, setSubmitting] = useState(false);
+    const [generating, setGenerating] = useState(false);
+    const [aiPrompt, setAiPrompt] = useState({
+        topic: '',
+        audience: 'Developers',
+        tone: 'Professional',
+        keywords: '',
+    });
     const [formData, setFormData] = useState({
         title: '',
         slug: '',
@@ -38,6 +45,41 @@ export default function AddBlogPage() {
         setFormData((prev) => ({ ...prev, content: value }));
     };
 
+    const handleAiPromptChange = (e) => {
+        const { name, value } = e.target;
+        setAiPrompt((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleGenerateDraft = async () => {
+        if (!aiPrompt.topic.trim()) {
+            alert('Please enter a topic for the AI blog draft');
+            return;
+        }
+
+        setGenerating(true);
+        try {
+            const response = await generateBlogDraft({
+                ...aiPrompt,
+                category: formData.category,
+            });
+
+            setFormData((prev) => ({
+                ...prev,
+                title: response.data.title || '',
+                slug: response.data.slug || '',
+                image: response.data.image || prev.image,
+                category: response.data.category || '',
+                description: response.data.description || '',
+                content: response.data.content || '',
+                tags: Array.isArray(response.data.tags) ? response.data.tags.join(', ') : '',
+            }));
+        } catch (err) {
+            alert('AI Error: ' + (err instanceof ApiError ? err.message : err.message));
+        } finally {
+            setGenerating(false);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitting(true);
@@ -59,6 +101,71 @@ export default function AddBlogPage() {
             <h2 style={{ fontSize: '1.875rem', fontWeight: 700, marginBottom: '2rem' }}>Add New Blog Post</h2>
 
             <div className="card">
+                <div style={{ marginBottom: '2rem', padding: '1.25rem', borderRadius: '12px', border: '1px solid var(--border)', backgroundColor: 'var(--bg-secondary)' }}>
+                    <h3 style={{ marginBottom: '0.5rem', fontSize: '1.1rem' }}>AI Blog Draft Generator</h3>
+                    <p style={{ marginBottom: '1rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                        Ek prompt likho, AI response aayega aur form ke fields automatically fill ho jayenge. Aap review karke submit kar sakte ho.
+                    </p>
+                    <div style={{ display: 'grid', gap: '1rem' }}>
+                        <div>
+                            <label>AI Prompt / Brief</label>
+                            <textarea
+                                name="topic"
+                                value={aiPrompt.topic}
+                                onChange={handleAiPromptChange}
+                                rows="4"
+                                placeholder="e.g. Write a detailed blog on Next.js performance tips for SaaS apps, include SEO best practices, real examples, and practical optimization steps."
+                                style={{
+                                    width: '100%',
+                                    padding: '0.75rem',
+                                    borderRadius: '8px',
+                                    backgroundColor: 'var(--bg-tertiary)',
+                                    border: '1px solid var(--border)',
+                                    color: 'var(--text-primary)',
+                                    outline: 'none',
+                                }}
+                            />
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                            <div>
+                                <label>Audience</label>
+                                <input
+                                    type="text"
+                                    name="audience"
+                                    value={aiPrompt.audience}
+                                    onChange={handleAiPromptChange}
+                                    placeholder="Developers"
+                                />
+                            </div>
+                            <div>
+                                <label>Tone</label>
+                                <input
+                                    type="text"
+                                    name="tone"
+                                    value={aiPrompt.tone}
+                                    onChange={handleAiPromptChange}
+                                    placeholder="Professional"
+                                />
+                            </div>
+                        </div>
+                        <div>
+                            <label>Keywords</label>
+                            <input
+                                type="text"
+                                name="keywords"
+                                value={aiPrompt.keywords}
+                                onChange={handleAiPromptChange}
+                                placeholder="next.js, seo, optimization"
+                            />
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <button type="button" className="btn" onClick={handleGenerateDraft} disabled={generating}>
+                                {generating ? 'Filling Fields...' : 'Fill Form With AI'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <form onSubmit={handleSubmit}>
                     <div>
                         <label>Title</label>

@@ -26,6 +26,11 @@ export const createQuestion = async (data) => {
   return response.data;
 };
 
+export const generateQuestionDraft = async (data) => {
+  const response = await apiPost('/ai/question', data);
+  return response.data;
+};
+
 export const updateQuestion = async (id, data) => {
   const response = await apiPut(`${ENDPOINT}/${id}`, data);
   return response.data;

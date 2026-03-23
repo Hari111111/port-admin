@@ -36,6 +36,13 @@ export const createBlog = (blogData) => apiPost(ENDPOINT, blogData);
 export const updateBlog = (id, blogData) => apiPut(`${ENDPOINT}/${id}`, blogData);
 
 /**
+ * Generate an AI draft for a blog post
+ * @param {{ topic: string, category?: string, audience?: string, tone?: string, keywords?: string }} payload
+ * @returns {Promise<object>}
+ */
+export const generateBlogDraft = (payload) => apiPost('/ai/blog', payload);
+
+/**
  * Delete a blog post by ID
  * @param {string} id
  * @returns {Promise<any>}
