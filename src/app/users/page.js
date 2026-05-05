@@ -4,10 +4,102 @@ import { useEffect, useState } from 'react';
 import { getAllUsers } from '@/services/userService';
 import { ApiError } from '@/lib/api';
 
+// ─── Resume Modal Component ───────────────────────────────────────────────────
+
+function ResumeModal({ user, onClose }) {
+    if (!user || !user.resume) return null;
+
+    const { personalInfo, skills, experience, education, projects, languages } = user.resume;
+
+    return (
+        <div className="modal-overlay" onClick={onClose}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-header">
+                    <div>
+                        <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--accent)' }}>
+                            {personalInfo?.fullName || user.name}'s Resume
+                        </h3>
+                        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                            {personalInfo?.jobTitle || 'User Profile'}
+                        </p>
+                    </div>
+                    <button className="close-btn" onClick={onClose}>&times;</button>
+                </div>
+                <div className="modal-body">
+                    {/* Summary */}
+                    {personalInfo?.summary && (
+                        <section style={{ marginBottom: '2rem' }}>
+                            <h4 style={{ fontSize: '0.9rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>Summary</h4>
+                            <p style={{ lineHeight: 1.6 }}>{personalInfo.summary}</p>
+                        </section>
+                    )}
+
+                    {/* Skills */}
+                    {skills && skills.length > 0 && (
+                        <section style={{ marginBottom: '2rem' }}>
+                            <h4 style={{ fontSize: '0.9rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>Skills</h4>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                {skills.map((skill, i) => (
+                                    <span key={i} className="status active">{skill}</span>
+                                ))}
+                            </div>
+                        </section>
+                    )}
+
+                    {/* Experience */}
+                    {experience && experience.length > 0 && (
+                        <section style={{ marginBottom: '2rem' }}>
+                            <h4 style={{ fontSize: '0.9rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>Experience</h4>
+                            {experience.map((exp, i) => (
+                                <div key={i} style={{ marginBottom: '1.25rem', borderLeft: '2px solid var(--accent-dim)', paddingLeft: '1rem' }}>
+                                    <div style={{ fontWeight: 700 }}>{exp.position}</div>
+                                    <div style={{ color: 'var(--accent)', fontSize: '0.9rem', fontWeight: 500 }}>{exp.company} | {exp.duration}</div>
+                                    <p style={{ fontSize: '0.9rem', marginTop: '0.5rem', color: 'var(--text-secondary)' }}>{exp.description}</p>
+                                </div>
+                            ))}
+                        </section>
+                    )}
+
+                    {/* Education */}
+                    {education && education.length > 0 && (
+                        <section style={{ marginBottom: '2rem' }}>
+                            <h4 style={{ fontSize: '0.9rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>Education</h4>
+                            {education.map((edu, i) => (
+                                <div key={i} style={{ marginBottom: '0.75rem' }}>
+                                    <div style={{ fontWeight: 600 }}>{edu.degree}</div>
+                                    <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{edu.school} • {edu.year}</div>
+                                </div>
+                            ))}
+                        </section>
+                    )}
+
+                    {/* Projects */}
+                    {projects && projects.length > 0 && (
+                        <section style={{ marginBottom: '2rem' }}>
+                            <h4 style={{ fontSize: '0.9rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>Projects</h4>
+                            {projects.map((proj, i) => (
+                                <div key={i} style={{ marginBottom: '1rem' }}>
+                                    <div style={{ fontWeight: 600 }}>{proj.title}</div>
+                                    <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{proj.description}</p>
+                                    {proj.link && <a href={proj.link} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.8rem', color: 'var(--accent)' }}>View Project &rarr;</a>}
+                                </div>
+                            ))}
+                        </section>
+                    )}
+                </div>
+                <div style={{ padding: '1.5rem 2rem', background: 'var(--bg-primary)', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end' }}>
+                    <button className="btn" onClick={onClose}>Close View</button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export default function UsersPage() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [selectedUser, setSelectedUser] = useState(null);
 
     useEffect(() => {
         fetchUsers();
@@ -49,7 +141,6 @@ export default function UsersPage() {
                     <h2 style={{ fontSize: '1.875rem', fontWeight: 700 }}>Users</h2>
                     <p style={{ color: 'var(--text-secondary)' }}>Manage your users here</p>
                 </div>
-                <button className="btn">Add New User</button>
             </header>
 
             {error && (
@@ -71,9 +162,9 @@ export default function UsersPage() {
                                     <th>Name</th>
                                     <th>Email</th>
                                     <th>Role</th>
-                                    <th>Resume</th>
-                                    <th>Resume Details</th>
-                                    <th>Joined</th>
+                                    <th>Resume Status</th>
+                                    <th>Preview</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -81,67 +172,62 @@ export default function UsersPage() {
                                     const resumeStatus = getResumeStatus(user);
                                     const resumeTitle =
                                         user.resume?.personalInfo?.jobTitle ||
-                                        user.resume?.personalInfo?.fullName ||
-                                        'No resume title';
+                                        'No Job Title';
                                     const resumeSummary =
                                         user.resume?.personalInfo?.summary ||
-                                        'Resume summary not added yet.';
+                                        'No summary added.';
 
                                     return (
-                                    <tr key={user._id}>
-                                        <td>
-                                            <div style={{ fontWeight: 500 }}>{user.name}</div>
-                                        </td>
-                                        <td style={{ color: 'var(--text-secondary)' }}>{user.email}</td>
-                                        <td>
-                                            <span className={`status ${user.isAdmin ? 'active' : 'inactive'}`}>
-                                                {user.isAdmin ? 'Admin' : 'User'}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span className={`status ${resumeStatus.className}`}>
-                                                {resumeStatus.label}
-                                            </span>
-                                        </td>
-                                        <td style={{ minWidth: '280px' }}>
-                                            <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>
-                                                {resumeTitle}
-                                            </div>
-                                            <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.5, marginBottom: '0.4rem' }}>
-                                                {resumeSummary.length > 120 ? `${resumeSummary.slice(0, 120)}...` : resumeSummary}
-                                            </div>
-                                            {user.resume ? (
-                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-                                                    <span className="status active">
-                                                        Skills: {user.resume.skills?.length || 0}
-                                                    </span>
-                                                    <span className="status">
-                                                        Exp: {user.resume.experience?.length || 0}
-                                                    </span>
-                                                    <span className="status">
-                                                        Projects: {user.resume.projects?.length || 0}
-                                                    </span>
-                                                </div>
-                                            ) : (
-                                                <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                                                    Resume data not found
+                                        <tr key={user._id}>
+                                            <td>
+                                                <div style={{ fontWeight: 600 }}>{user.name}</div>
+                                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ID: {user._id.slice(-6)}</div>
+                                            </td>
+                                            <td style={{ color: 'var(--text-secondary)' }}>{user.email}</td>
+                                            <td>
+                                                <span className={`status ${user.isAdmin ? 'active' : 'inactive'}`}>
+                                                    {user.isAdmin ? 'Admin' : 'User'}
                                                 </span>
-                                            )}
-                                        </td>
-                                        <td style={{ color: 'var(--text-secondary)' }}>
-                                            <div>{new Date(user.createdAt).toLocaleDateString()}</div>
-                                            {user.resume?.updatedAt && (
-                                                <div style={{ fontSize: '0.8rem', marginTop: '0.25rem' }}>
-                                                    Resume: {new Date(user.resume.updatedAt).toLocaleDateString()}
+                                            </td>
+                                            <td>
+                                                <span className={`status ${resumeStatus.className}`}>
+                                                    {resumeStatus.label}
+                                                </span>
+                                            </td>
+                                            <td style={{ maxWidth: '250px' }}>
+                                                <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>{resumeTitle}</div>
+                                                <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                    {resumeSummary}
                                                 </div>
-                                            )}
-                                        </td>
-                                    </tr>
-                                )})}
+                                            </td>
+                                            <td>
+                                                {user.resume ? (
+                                                    <button 
+                                                        className="btn" 
+                                                        style={{ padding: '0.5rem 1rem', fontSize: '0.75rem' }}
+                                                        onClick={() => setSelectedUser(user)}
+                                                    >
+                                                        View Resume
+                                                    </button>
+                                                ) : (
+                                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>No Data</span>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     )}
                 </div>
+            )}
+
+            {/* Resume Modal */}
+            {selectedUser && (
+                <ResumeModal 
+                    user={selectedUser} 
+                    onClose={() => setSelectedUser(null)} 
+                />
             )}
         </div>
     );
