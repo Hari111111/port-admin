@@ -9,7 +9,7 @@ import { ApiError } from '@/lib/api';
 
 export default function SignupPage() {
     const router = useRouter();
-    const { setUser } = useAuth();
+    const { setUser, refreshSession } = useAuth();
     const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '' });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -38,10 +38,24 @@ export default function SignupPage() {
                 email: formData.email,
                 password: formData.password,
             });
+            if (!user) {
+                throw new Error('Signup response did not include user details');
+            }
+
             setUser(user);
+            const verifiedUser = await refreshSession();
+
+            if (!verifiedUser) {
+                throw new Error('Account created, but the session could not be verified. Please check backend cookie/CORS settings.');
+            }
+
             router.replace('/');
         } catch (err) {
-            setError(err instanceof ApiError ? err.message : 'Registration failed. Please try again.');
+            setError(
+                err instanceof ApiError
+                    ? err.message
+                    : err?.message || 'Registration failed. Please try again.'
+            );
         } finally {
             setLoading(false);
         }

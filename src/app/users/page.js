@@ -24,6 +24,24 @@ export default function UsersPage() {
         }
     };
 
+    const getResumeStatus = (user) => {
+        if (!user.resume) {
+            return { label: 'No Resume', className: 'inactive' };
+        }
+
+        const hasCoreData =
+            user.resume.personalInfo?.summary ||
+            user.resume.skills?.length ||
+            user.resume.experience?.length ||
+            user.resume.education?.length;
+
+        if (hasCoreData) {
+            return { label: 'Resume Added', className: 'active' };
+        }
+
+        return { label: 'Draft Resume', className: 'inactive' };
+    };
+
     return (
         <div>
             <header className="flex-between" style={{ marginBottom: '2rem' }}>
@@ -53,12 +71,23 @@ export default function UsersPage() {
                                     <th>Name</th>
                                     <th>Email</th>
                                     <th>Role</th>
-                                    <th>Status</th>
+                                    <th>Resume</th>
+                                    <th>Resume Details</th>
                                     <th>Joined</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {users.map((user) => (
+                                {users.map((user) => {
+                                    const resumeStatus = getResumeStatus(user);
+                                    const resumeTitle =
+                                        user.resume?.personalInfo?.jobTitle ||
+                                        user.resume?.personalInfo?.fullName ||
+                                        'No resume title';
+                                    const resumeSummary =
+                                        user.resume?.personalInfo?.summary ||
+                                        'Resume summary not added yet.';
+
+                                    return (
                                     <tr key={user._id}>
                                         <td>
                                             <div style={{ fontWeight: 500 }}>{user.name}</div>
@@ -70,13 +99,45 @@ export default function UsersPage() {
                                             </span>
                                         </td>
                                         <td>
-                                            <span className="status active">Active</span>
+                                            <span className={`status ${resumeStatus.className}`}>
+                                                {resumeStatus.label}
+                                            </span>
+                                        </td>
+                                        <td style={{ minWidth: '280px' }}>
+                                            <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>
+                                                {resumeTitle}
+                                            </div>
+                                            <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.5, marginBottom: '0.4rem' }}>
+                                                {resumeSummary.length > 120 ? `${resumeSummary.slice(0, 120)}...` : resumeSummary}
+                                            </div>
+                                            {user.resume ? (
+                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                                                    <span className="status active">
+                                                        Skills: {user.resume.skills?.length || 0}
+                                                    </span>
+                                                    <span className="status">
+                                                        Exp: {user.resume.experience?.length || 0}
+                                                    </span>
+                                                    <span className="status">
+                                                        Projects: {user.resume.projects?.length || 0}
+                                                    </span>
+                                                </div>
+                                            ) : (
+                                                <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+                                                    Resume data not found
+                                                </span>
+                                            )}
                                         </td>
                                         <td style={{ color: 'var(--text-secondary)' }}>
-                                            {new Date(user.createdAt).toLocaleDateString()}
+                                            <div>{new Date(user.createdAt).toLocaleDateString()}</div>
+                                            {user.resume?.updatedAt && (
+                                                <div style={{ fontSize: '0.8rem', marginTop: '0.25rem' }}>
+                                                    Resume: {new Date(user.resume.updatedAt).toLocaleDateString()}
+                                                </div>
+                                            )}
                                         </td>
                                     </tr>
-                                ))}
+                                )})}
                             </tbody>
                         </table>
                     )}

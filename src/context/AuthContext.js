@@ -20,20 +20,28 @@ export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);       // null = not loaded yet
     const [loading, setLoading] = useState(true); // true until we verify session
 
+    const refreshSession = useCallback(async () => {
+        try {
+            const data = await getMe();
+            setUser(data);
+            return data;
+        } catch {
+            setUser(null);
+            return null;
+        }
+    }, []);
+
     // On mount: validate JWT cookie by calling /api/users/me
     useEffect(() => {
         const verifySession = async () => {
             try {
-                const data = await getMe();
-                setUser(data);
-            } catch {
-                setUser(null);
+                await refreshSession();
             } finally {
                 setLoading(false);
             }
         };
         verifySession();
-    }, []);
+    }, [refreshSession]);
 
     // Redirect logic after loading completes
     useEffect(() => {
@@ -61,7 +69,7 @@ export function AuthProvider({ children }) {
     }, [router]);
 
     return (
-        <AuthContext.Provider value={{ user, setUser, loading, logout }}>
+        <AuthContext.Provider value={{ user, setUser, loading, logout, refreshSession }}>
             {children}
         </AuthContext.Provider>
     );

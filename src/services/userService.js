@@ -7,19 +7,38 @@ import { apiGet, apiPost } from '@/lib/api';
 
 const ENDPOINT = '/users';
 
+export function normalizeUser(data) {
+    const user = data?.user ?? data;
+
+    if (!user || typeof user !== 'object') {
+        return null;
+    }
+
+    if (!user._id && !user.email) {
+        return null;
+    }
+
+    return {
+        _id: user._id,
+        name: user.name || '',
+        email: user.email || '',
+        isAdmin: Boolean(user.isAdmin),
+    };
+}
+
 /**
  * Login with email & password. Sets HTTP-only JWT cookie via backend.
  * @param {{ email: string, password: string }} credentials
  * @returns {Promise<{ _id, name, email, isAdmin }>}
  */
-export const login = (credentials) => apiPost(`${ENDPOINT}/login`, credentials);
+export const login = async (credentials) => normalizeUser(await apiPost(`${ENDPOINT}/login`, credentials));
 
 /**
  * Register a new user account.
  * @param {{ name: string, email: string, password: string }} userData
  * @returns {Promise<{ _id, name, email, isAdmin }>}
  */
-export const register = (userData) => apiPost(ENDPOINT, userData);
+export const register = async (userData) => normalizeUser(await apiPost(ENDPOINT, userData));
 
 /**
  * Logout — clears the JWT cookie on the server.
@@ -31,7 +50,7 @@ export const logout = () => apiPost(`${ENDPOINT}/logout`, {});
  * Get currently logged-in user info (validates the JWT cookie).
  * @returns {Promise<{ _id, name, email, isAdmin }>}
  */
-export const getMe = () => apiGet(`${ENDPOINT}/me`);
+export const getMe = async () => normalizeUser(await apiGet(`${ENDPOINT}/me`));
 
 /**
  * Fetch all users (admin-protected)

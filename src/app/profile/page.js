@@ -17,6 +17,7 @@ export default function ProfilePage() {
         phone: '',
         location: '',
         about: '',
+        profileImage: '',
         resumeLink: '',
         socials: { github: '', linkedin: '', website: '' },
         skills: '',
@@ -39,6 +40,7 @@ export default function ProfilePage() {
                 interests: data.interests ? data.interests.join(', ') : '',
                 experience: data.experience || [],
                 education: data.education || [],
+                profileImage: data.profileImage || '',
             });
         } catch (err) {
             console.error('Failed to load profile:', err instanceof ApiError ? err.message : err);
@@ -226,6 +228,17 @@ export default function ProfilePage() {
                 {/* Other Details */}
                 <div className="card" style={{ marginBottom: '2rem' }}>
                     <h3 style={{ marginBottom: '1.5rem', color: 'var(--accent)', fontSize: '1.25rem' }}>Additional Info</h3>
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <FileUpload
+                            type="image"
+                            label="Profile Photo"
+                            onUploadSuccess={(url) => setFormData(prev => ({ ...prev, profileImage: url }))}
+                        />
+                        <div style={{ marginTop: '0.75rem' }}>
+                            <label style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Or manually enter image link</label>
+                            <input type="url" name="profileImage" value={formData.profileImage} onChange={handleChange} />
+                        </div>
+                    </div>
                     <div>
                         <FileUpload 
                             type="pdf" 

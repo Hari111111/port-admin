@@ -40,20 +40,17 @@ const Sidebar = () => {
     await logout();
   };
 
-  // Generate avatar initials from name
   const initials = user?.name
-    ? user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
-    : 'A';
+    ? user.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
+    : user?.email?.charAt(0)?.toUpperCase() || 'A';
 
   return (
     <aside className="sidebar">
-      {/* Logo */}
       <div className="logo-container">
         <div className="logo-icon">A</div>
         <h1 className="logo">Admin<span style={{ color: 'var(--accent)' }}>Panel</span></h1>
       </div>
 
-      {/* Nav links */}
       <nav className="nav">
         {menuGroups.map((group) => (
           <div key={group.title} className="menu-group">
@@ -73,17 +70,16 @@ const Sidebar = () => {
         ))}
       </nav>
 
-      {/* Spacer */}
       <div style={{ flex: 1 }} />
 
-      {/* User card + Logout */}
       {user && (
         <div className="user-section">
           <div className="user-card">
             <div className="user-avatar">{initials}</div>
             <div className="user-info">
-              <div className="user-name">{user.name}</div>
-              <div className="user-role">{user.isAdmin ? '⭐ Admin' : 'Member'}</div>
+              <div className="user-name">{user.name || user.email || 'Signed In User'}</div>
+              {user.email && <div className="user-email">{user.email}</div>}
+              <div className="user-role">{user.isAdmin ? 'â­ Admin' : 'Member'}</div>
             </div>
           </div>
           <button
@@ -237,6 +233,12 @@ const Sidebar = () => {
           font-size: 0.95rem;
           font-weight: 700;
           color: var(--text-primary);
+        }
+
+        .user-email {
+          font-size: 0.78rem;
+          color: var(--text-muted);
+          margin-top: 0.15rem;
         }
 
         .user-role {

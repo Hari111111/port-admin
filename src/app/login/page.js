@@ -9,7 +9,7 @@ import { ApiError } from '@/lib/api';
 
 export default function LoginPage() {
     const router = useRouter();
-    const { setUser } = useAuth();
+    const { setUser, refreshSession } = useAuth();
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -26,10 +26,24 @@ export default function LoginPage() {
         setError('');
         try {
             const user = await login(formData);
+            if (!user) {
+                throw new Error('Login response did not include user details');
+            }
+
             setUser(user);
+            const verifiedUser = await refreshSession();
+
+            if (!verifiedUser) {
+                throw new Error('Login succeeded, but the session could not be verified. Please check backend cookie/CORS settings.');
+            }
+
             router.replace('/');
         } catch (err) {
-            setError(err instanceof ApiError ? err.message : 'Login failed. Please try again.');
+            setError(
+                err instanceof ApiError
+                    ? err.message
+                    : err?.message || 'Login failed. Please try again.'
+            );
         } finally {
             setLoading(false);
         }
